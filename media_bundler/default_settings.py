@@ -12,7 +12,7 @@ from django.conf import settings
 # debugging, we recommend keeping files separate during development and bundle
 # them during production, so by default we just use settings.DEBUG, but you can
 # override that value if you wish.
-USE_BUNDLES = settings.DEBUG
+USE_BUNDLES = not settings.DEBUG
 
 # This puts your JavaScript at the bottom of your templates instead of the top
 # in order to allow the page to load before script execution, as described in
