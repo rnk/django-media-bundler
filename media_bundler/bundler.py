@@ -2,7 +2,6 @@
 
 from __future__ import with_statement
 
-import Image
 import math
 import os
 import shutil
@@ -133,6 +132,7 @@ class PngSpriteBundle(Bundle):
         return ".png"
 
     def make_bundle(self):
+        import Image  # If this fails, you need the Python Imaging Library.
         boxes = [ImageBox(Image.open(path), path) for path in self.get_paths()]
         # Pick a max_width so that the sprite is squarish and a multiple of 16,
         # and so no image is too wide to fit.
