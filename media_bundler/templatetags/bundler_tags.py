@@ -44,6 +44,13 @@ def bundle_tag(tag_func):
     new_tag_func.__name__ = tag_func.__name__
     return new_tag_func
 
+                
+
+def resolve_variable(var, context):
+    try:
+        return var.resolve(context)
+    except AttributeError:
+        return var
 
 class BundleNode(template.Node):
 
@@ -65,8 +72,8 @@ class BundleNode(template.Node):
         self.file_name = file_name
 
     def render(self, context):
-        bundle_name = self.bundle_name.resolve(context)
-        file_name = self.file_name.resolve(context)
+        bundle_name = resolve_variable(self.bundle_name, context)
+        file_name = resolve_variable(self.file_name, context)
         bundle = bundler.get_bundles()[bundle_name]
         if file_name not in bundle.files:
             msg = "File %r is not in bundle %r." % (file_name,
@@ -175,3 +182,40 @@ class DeferredContentNode(template.Node):
 
     def render(self, context):
         return "\n".join(context.get("_deferred_content", ()))
+
+class MultiBundleNode(template.Node):
+    """Node loading a complete bundle by name."""
+
+    bundle_type_handlers = {
+        "javascript": JavascriptNode,
+        "css": CssNode,
+    }
+
+    def __init__(self, bundle_name_var, **kwargs):
+        self.bundle_name_var = Variable(bundle_name_var)
+
+        for attr_name, attr_value in kwargs.items():
+            if hasattr(self, attr_name):
+                setattr(self, attr_name, attr_value)
+
+    def render(self, context):
+        bundle_name = self.bundle_name_var.resolve(context)
+        bundle = bundler.get_bundles()[bundle_name]
+        type_handler = self.bundle_type_handlers[bundle.type]
+        
+        def process_file(file_name):
+            return type_handler(self.bundle_name_var,
+                                file_name).render(context)
+
+        tags = [process_file(file_name) for file_name in bundle.files]
+        return "\n".join(tags)
+
+@register.tag
+def load_bundle(parser, token):
+    try:
+        tag_name, bundle_name = token.split_contents()
+    except ValueError:
+        tag_name = token.contents.split()[0]
+        msg = "%r tag takes a single argument: bundle_name."
+        raise template.TemplateSyntaxError(msg % tag_name)
+    return MultiBundleNode(bundle_name)
