@@ -5,6 +5,7 @@ Template tags for the django media bundler.
 """
 
 from django import template
+from django.template import Variable
 
 from media_bundler import bundler
 from media_bundler import bundler_settings
@@ -36,10 +37,9 @@ def bundle_tag(tag_func):
             tag_name = token.contents.split()[0]
             msg = "%r tag takes two arguments: bundle_name and file_name."
             raise template.TemplateSyntaxError(msg % tag_name)
-        if not _in_quotes(bundle_name) or not _in_quotes(file_name):
-            msg = "%r tag's arguments should be in quotes" % tag_name
-            raise template.TemplateSyntaxError(msg)
-        return tag_func(bundle_name[1:-1], file_name[1:-1])
+        bundle_name_var = Variable(bundle_name)
+        file_name_var = Variable(file_name)
+        return tag_func(bundle_name_var, file_name_var)
     # Hack so that register.tag behaves correctly.
     new_tag_func.__name__ = tag_func.__name__
     return new_tag_func
@@ -65,23 +65,25 @@ class BundleNode(template.Node):
         self.file_name = file_name
 
     def render(self, context):
-        bundle = bundler.get_bundles()[self.bundle_name]
-        if self.file_name not in bundle.files:
-            msg = "File %r is not in bundle %r." % (self.file_name,
-                                                    self.bundle_name)
+        bundle_name = self.bundle_name.resolve(context)
+        file_name = self.file_name.resolve(context)
+        bundle = bundler.get_bundles()[bundle_name]
+        if file_name not in bundle.files:
+            msg = "File %r is not in bundle %r." % (file_name,
+                                                    bundle_name)
             raise template.TemplateSyntaxError(msg)
         url_set = context_set_default(context, self.CONTEXT_VAR, set())
         if bundler_settings.USE_BUNDLES:
             url = bundle.get_bundle_url()
         else:
-            url = bundle.url + self.file_name
+            url = bundle.url + file_name
         if url in url_set:
             return ""  # Don't add a bundle or css url twice.
         else:
             url_set.add(url)
-            return self.really_render(context, url)
+            return self.really_render(context, url, bundle_name, file_name)
 
-    def really_render(self, context, url):
+    def really_render(self, context, url, bundle_name, file_name):
         """Implement bundle type specific rendering behavior."""
         return self.TAG % url
 
@@ -104,8 +106,9 @@ class JavascriptNode(BundleNode):
     def __init__(self, bundle_name, script_name):
         super(JavascriptNode, self).__init__(bundle_name, script_name)
 
-    def really_render(self, context, url):
-        content = super(JavascriptNode, self).really_render(context, url)
+    def really_render(self, context, url, bundle_name, file_name):
+        content = super(JavascriptNode, self).really_render(context, url,
+                bundle_name, file_name)
         if bundler_settings.DEFER_JAVASCRIPT:
             deferred = context_set_default(context, "_deferred_content", [])
             deferred.append(content)
