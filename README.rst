@@ -104,6 +104,16 @@ you should write this::
   {% javascript "js_bundle_name" "myscript.js" %}
   {% css "css_bundle_name" "mystyle.css" %}
 
+If you want, you can load all the files in a bundle at once with the
+``load_bundle`` tag::
+
+  {% load_bundle "js_bundle_name" %}
+  {% load_bundle "css_bundle_name" %}
+
+``load_bundle`` will add ``{% css %}`` and ``{% javascript %}`` tags for all
+the files in the bundle.
+
 If you are deferring your Javascript, then at the bottom of your base template
 you should insert the tag ``{% deferred_content %}``.  We recommend opening a
 second head tag after your body and putting it there.
+
