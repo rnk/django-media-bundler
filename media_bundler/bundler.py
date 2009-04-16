@@ -56,17 +56,17 @@ class Bundle(object):
             cls.check_attr(attrs, attr)
         if attrs["type"] == "javascript":
             return JavascriptBundle(attrs["name"], attrs["path"], attrs["url"],
-                                    attrs["files"], attrs.get("minify", False),
-                                    attrs["type"])
+                                    attrs["files"], attrs["type"],
+                                    attrs.get("minify", False))
         elif attrs["type"] == "css":
             return CssBundle(attrs["name"], attrs["path"], attrs["url"],
-                             attrs["files"], attrs.get("minify", False),
-                             attrs["type"])
+                             attrs["files"], attrs["type"],
+                             attrs.get("minify", False))
         elif attrs["type"] == "png-sprite":
             cls.check_attr(attrs, "css_file")
             return PngSpriteBundle(attrs["name"], attrs["path"], attrs["url"],
-                                   attrs["files"], attrs["css_file"],
-                                   attrs["type"])
+                                   attrs["files"], attrs["type"],
+                                   attrs["css_file"])
         else:
             raise InvalidBundleType
 
@@ -100,8 +100,8 @@ class Bundle(object):
 
 class JavascriptBundle(Bundle):
 
-    def __init__(self, name, path, url, files, minify):
-        super(JavascriptBundle, self).__init__(name, path, url, files)
+    def __init__(self, name, path, url, files, type, minify):
+        super(JavascriptBundle, self).__init__(name, path, url, files, type)
         self.minify = minify
 
     def get_extension(self):
@@ -114,8 +114,8 @@ class JavascriptBundle(Bundle):
 
 class CssBundle(Bundle):
 
-    def __init__(self, name, path, url, files, minify):
-        super(CssBundle, self).__init__(name, path, url, files)
+    def __init__(self, name, path, url, files, type, minify):
+        super(CssBundle, self).__init__(name, path, url, files, type)
         self.minify = minify
 
     def get_extension(self):
@@ -128,8 +128,8 @@ class CssBundle(Bundle):
 
 class PngSpriteBundle(Bundle):
 
-    def __init__(self, name, path, url, files, css_file):
-        super(PngSpriteBundle, self).__init__(name, path, url, files)
+    def __init__(self, name, path, url, files, type, css_file):
+        super(PngSpriteBundle, self).__init__(name, path, url, files, type)
         self.css_file = css_file
 
     def get_extension(self):
