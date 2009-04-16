@@ -9,21 +9,25 @@ except ImportError:
     use_setuptools()
     from setuptools import setup, find_packages
 
+import media_bundler
+
 setup(
     name='django-media-bundler',
-    version="0.2-ask",
+    version=media_bundler.__version__,
     author='Reid Kleckner',
     author_email='rnk@mit.edu',
-    description="Django Media Bundler",
+    description="Django application that bundles your Javascript/CSS, "
+               +"and sprites your icons.",
     packages=find_packages(),
     zip_safe=False,
-    url='',
+    url='http://github.com/ask/django-media-bundler/',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: GNU General Public License (GPL)",
+        "License :: OSI Approved :: BSD License",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
+        "Framework :: Django",
     ],
     long_description="",
 )
