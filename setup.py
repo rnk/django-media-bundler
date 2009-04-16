@@ -11,7 +11,7 @@ except ImportError:
 
 setup(
     name='django-media-bundler',
-    version="0.1",
+    version="0.2-ask",
     author='Reid Kleckner',
     author_email='rnk@mit.edu',
     description="Django Media Bundler",
