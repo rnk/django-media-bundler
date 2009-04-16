@@ -36,13 +36,14 @@ def concatenate_files(paths):
 
 class Bundle(object):
 
-    def __init__(self, name, path, url, files):
+    def __init__(self, name, path, url, files, type):
         self.name = name
         self.path = path
         self.url = url
         if not url.endswith("/"):
             raise ValueError("Bundle URLs must end with a '/'.")
         self.files = files
+        self.type = type
 
     @classmethod
     def check_attr(cls, attrs, attr):
@@ -55,14 +56,17 @@ class Bundle(object):
             cls.check_attr(attrs, attr)
         if attrs["type"] == "javascript":
             return JavascriptBundle(attrs["name"], attrs["path"], attrs["url"],
-                                    attrs["files"], attrs.get("minify", False))
+                                    attrs["files"], attrs.get("minify", False),
+                                    attrs["type"])
         elif attrs["type"] == "css":
             return CssBundle(attrs["name"], attrs["path"], attrs["url"],
-                             attrs["files"], attrs.get("minify", False))
+                             attrs["files"], attrs.get("minify", False),
+                             attrs["type"])
         elif attrs["type"] == "png-sprite":
             cls.check_attr(attrs, "css_file")
             return PngSpriteBundle(attrs["name"], attrs["path"], attrs["url"],
-                                   attrs["files"], attrs["css_file"])
+                                   attrs["files"], attrs["css_file"],
+                                   attrs["type"])
         else:
             raise InvalidBundleType
 
