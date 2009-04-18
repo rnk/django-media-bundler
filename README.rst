@@ -6,9 +6,12 @@ icons for production, while still being easy to debug during development.  To
 use the media bundler, you just have to describe the media you would like to be
 bundled together in your ``settings.py`` file, and run ``python manage.py
 bundle_media``.  The Media Bundler is inspired by the Rails' `Asset Packager`_
-plugin, which helps do roughly the same things for Rails.
+plugin, which helps do roughly the same things for Rails.  This is not the first
+Django application for this task, and it is probably not the last.  You can find
+a good comparison of other media bundling tools here_.
 
 .. _Asset Packager: http://synthesis.sbecker.net/pages/asset_packager
+.. _here: http://qinsb.blogspot.com/2009/02/alternatives-to-django-media-bundler.html
 
 Supported Bundle Types
 ----------------------
@@ -116,4 +119,3 @@ the files in the bundle.
 If you are deferring your Javascript, then at the bottom of your base template
 you should insert the tag ``{% deferred_content %}``.  We recommend opening a
 second head tag after your body and putting it there.
-
