@@ -1,1 +1,1 @@
-__version__ = "0.3-ask"
+__version__ = "0.3"

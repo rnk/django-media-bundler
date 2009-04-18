@@ -23,12 +23,6 @@ def context_set_default(context, key, default):
         return default
 
 
-def _in_quotes(string):
-    """Return True if string is quoted with ' or "."""
-    return (string[0] == string[-1] and
-            string[0] in ('"', "'"))
-
-
 def bundle_tag(tag_func):
     def new_tag_func(parser, token):
         try:
@@ -44,13 +38,13 @@ def bundle_tag(tag_func):
     new_tag_func.__name__ = tag_func.__name__
     return new_tag_func
 
-                
 
 def resolve_variable(var, context):
     try:
         return var.resolve(context)
     except AttributeError:
         return var
+
 
 class BundleNode(template.Node):
 
@@ -183,7 +177,9 @@ class DeferredContentNode(template.Node):
     def render(self, context):
         return "\n".join(context.get("_deferred_content", ()))
 
+
 class MultiBundleNode(template.Node):
+
     """Node loading a complete bundle by name."""
 
     bundle_type_handlers = {
@@ -202,13 +198,14 @@ class MultiBundleNode(template.Node):
         bundle_name = self.bundle_name_var.resolve(context)
         bundle = bundler.get_bundles()[bundle_name]
         type_handler = self.bundle_type_handlers[bundle.type]
-        
+
         def process_file(file_name):
             return type_handler(self.bundle_name_var,
                                 file_name).render(context)
 
         tags = [process_file(file_name) for file_name in bundle.files]
         return "\n".join(tags)
+
 
 @register.tag
 def load_bundle(parser, token):

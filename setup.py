@@ -20,7 +20,7 @@ setup(
                +"and sprites your icons.",
     packages=find_packages(),
     zip_safe=False,
-    url='http://github.com/ask/django-media-bundler/',
+    url='http://github.com/rnk/django-media-bundler/',
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
