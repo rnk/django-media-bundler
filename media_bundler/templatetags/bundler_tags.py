@@ -8,7 +8,7 @@ from django import template
 from django.template import Variable
 
 from media_bundler import bundler
-from media_bundler import bundler_settings
+from media_bundler.conf import bundler_settings
 
 register = template.Library()
 

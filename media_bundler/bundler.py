@@ -9,7 +9,7 @@ import subprocess
 import re
 from StringIO import StringIO
 
-from media_bundler import bundler_settings
+from media_bundler.conf import bundler_settings
 from media_bundler.bin_packing import Box, pack_boxes
 from media_bundler.jsmin import jsmin
 from media_bundler.cssmin import minify_css

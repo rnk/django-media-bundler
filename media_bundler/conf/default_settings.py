@@ -1,4 +1,4 @@
-# media_bundler/default_settings.py
+# media_bundler/conf/default_settings.py
 
 """
 These are the default settings for media_bunder.

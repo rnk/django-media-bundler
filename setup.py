@@ -22,6 +22,7 @@ setup(
     zip_safe=False,
     url='http://github.com/rnk/django-media-bundler/',
     classifiers=[
+        "Environment :: Web Environment",
         "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
