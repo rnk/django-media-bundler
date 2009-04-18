@@ -29,23 +29,8 @@ class Box(object):
         return "Box(%r, %r)" % (self.width, self.height)
 
 
-class TransposedBox(object):
-
-    """Transform a box so that its width and height are swapped."""
-
-    def __init__(self, box):
-        self.box = box
-
-    @property
-    def width(self): return self.box.height
-
-    @property
-    def height(self): return self.box.width
-
-
 def pack_boxes(boxes, max_width=None):
-    """
-    Approximately packs boxes in a rectangle with minimal area.
+    """Approximately packs boxes in a rectangle with minimal area.
 
     Basic algorithm:
     - Pick a width so that our rectangle comes out squarish.
@@ -59,12 +44,12 @@ def pack_boxes(boxes, max_width=None):
         max_width = max(max(box.width for box in boxes),
                         int(math.sqrt(total_area)))
     unplaced = sorted(boxes, key=lambda box: (-box.height, -box.width))
-    next_unplaced = []
     packing = []
     y_off = 0
     while unplaced:
         strip_width = 0
         strip_height = 0
+        next_unplaced = []
         for box in unplaced:
             if strip_width + box.width <= max_width:
                 packing.append((strip_width, y_off, box))
@@ -74,11 +59,11 @@ def pack_boxes(boxes, max_width=None):
                 next_unplaced.append(box)
         y_off += strip_height
         unplaced = next_unplaced
-        next_unplaced = []
     return (max_width, y_off, packing)
 
 
 def boxes_overlap((x1, y1, box1), (x2, y2, box2)):
+    """Return True if the two boxes at (x1, y1) and (x2, y2) overlap."""
     left1 = x1
     top1 = y1
     right1 = x1 + box1.width
@@ -94,6 +79,7 @@ def boxes_overlap((x1, y1, box1), (x2, y2, box2)):
 
 
 def check_no_overlap(packing):
+    """Return True if none of the boxes in the packing overlap."""
     # TODO(rnk): It would be great if we could avoid comparing each box twice.
     for left in packing:
         for right in packing:

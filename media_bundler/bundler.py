@@ -14,13 +14,11 @@ from media_bundler.bin_packing import Box, pack_boxes
 from media_bundler.jsmin import jsmin
 from media_bundler.cssmin import minify_css
 
-_BUNDLES = None
-
 
 class InvalidBundleType(Exception):
 
-    def __init__(self, type):
-        msg = "Invalid bundle type: '%s'" % self.type
+    def __init__(self, type_):
+        msg = "Invalid bundle type: %r" % type_
         super(InvalidBundleType, self).__init__(msg)
 
 
@@ -35,6 +33,12 @@ def concatenate_files(paths):
 
 
 class Bundle(object):
+
+    """Base class for a bundle of media files.
+
+    A bundle is a collection of related static files that can be concatenated
+    together and served as a single file to improve performance.
+    """
 
     def __init__(self, name, path, url, files, type):
         self.name = name
@@ -68,7 +72,7 @@ class Bundle(object):
                                    attrs["files"], attrs["type"],
                                    attrs["css_file"])
         else:
-            raise InvalidBundleType
+            raise InvalidBundleType(attrs["type"])
 
     def get_paths(self):
         return [os.path.join(self.path, f) for f in self.files]
@@ -100,6 +104,8 @@ class Bundle(object):
 
 class JavascriptBundle(Bundle):
 
+    """Bundle for JavaScript."""
+
     def __init__(self, name, path, url, files, type, minify):
         super(JavascriptBundle, self).__init__(name, path, url, files, type)
         self.minify = minify
@@ -114,6 +120,8 @@ class JavascriptBundle(Bundle):
 
 class CssBundle(Bundle):
 
+    """Bundle for CSS."""
+
     def __init__(self, name, path, url, files, type, minify):
         super(CssBundle, self).__init__(name, path, url, files, type)
         self.minify = minify
@@ -127,6 +135,14 @@ class CssBundle(Bundle):
 
 
 class PngSpriteBundle(Bundle):
+
+    """Bundle for PNG sprites.
+
+    In addition to generating a PNG sprite, it also generates CSS rules so that
+    the user can easily place their sprites.  We build sprite bundles before CSS
+    bundles so that the user can bundle the generated CSS with the rest of their
+    CSS.
+    """
 
     def __init__(self, name, path, url, files, type, css_file):
         super(PngSpriteBundle, self).__init__(name, path, url, files, type)
@@ -202,16 +218,32 @@ class PngSpriteBundle(Bundle):
 
 class ImageBox(Box):
 
+    """A Box representing an image.
+
+    We hand these off to the bin packing algorithm.  After the boxes have been
+    arranged, we can place the associated image in the sprite.
+    """
+
     def __init__(self, image, filename):
         (width, height) = image.size
         super(ImageBox, self).__init__(width, height)
         self.image = image
         self.filename = filename
 
+    def __repr__(self):
+        return "<ImageBox: filename=%r image=%r>" % (self.filename, self.image)
+
+
+_bundles = None
 
 def get_bundles():
-    global _BUNDLES
-    if not _BUNDLES:
-        _BUNDLES = dict((bundle["name"], Bundle.from_dict(bundle))
+    """Return a dict of bundle names and bundles as described in settings.py.
+
+    The result of this function is cached, because settings should never change
+    throughout the execution of the program.
+    """
+    global _bundles
+    if not _bundles:
+        _bundles = dict((bundle["name"], Bundle.from_dict(bundle))
                         for bundle in bundler_settings.MEDIA_BUNDLES)
-    return _BUNDLES
+    return _bundles

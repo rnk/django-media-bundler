@@ -99,23 +99,23 @@ class BinPackingTest(unittest.TestCase):
         # III
         # III
         # III
+        # FFC
+        # FFC
+        # FFC
         # HHH
         # HHH
+        # EEB
+        # EEB
         # GGG
-        # FFC
-        # FFC
-        # FFC
-        # EEB
-        # EEB
         # DDA
         packing = [
             (0, 0, Box(3, 3)),
-            (0, 3, Box(3, 2)),
-            (0, 5, Box(3, 1)),
-            (0, 6, Box(2, 3)),
-            (2, 6, Box(1, 3)),
-            (0, 9, Box(2, 2)),
-            (2, 9, Box(1, 2)),
+            (0, 3, Box(2, 3)),
+            (2, 3, Box(1, 3)),
+            (0, 6, Box(3, 2)),
+            (0, 8, Box(2, 2)),
+            (2, 8, Box(1, 2)),
+            (0, 10, Box(3, 1)),
             (0, 11, Box(2, 1)),
             (2, 11, Box(1, 1)),
         ]
@@ -126,10 +126,11 @@ class BinPackingTest(unittest.TestCase):
     def testRandomNoOverlap(self):
         # Not having overlap is an important invariant we need to maintain.
         # This just checks it.
-        boxes = [Box(random.randrange(1, 40), random.randrange(1, 40))
-                 for _ in xrange(100)]
-        (_, _, actual) = pack_boxes(boxes)
-        self.assert_(check_no_overlap(actual))
+        for _ in xrange(3):
+            boxes = [Box(random.randrange(1, 40), random.randrange(1, 40))
+                     for _ in xrange(100)]
+            (_, _, actual) = pack_boxes(boxes)
+            self.assert_(check_no_overlap(actual))
 
 
 if __name__ == "__main__":
