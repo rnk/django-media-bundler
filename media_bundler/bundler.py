@@ -95,7 +95,8 @@ class Bundle(object):
 
     def make_bundle(self, versioner):
         self._make_bundle()
-        versioner.update_bundle_version(self)
+        if versioner:
+            versioner.update_bundle_version(self)
 
     def do_text_bundle(self, minifier=None):
         with open(self.get_bundle_path(), "w") as output:
@@ -181,7 +182,8 @@ class PngSpriteBundle(Bundle):
         # It's *REALLY* important that this happen here instead of after the
         # generate_css() call, because if we waited, the CSS woudl have the URL
         # of the last version of this bundle.
-        versioner.update_bundle_version(self)
+        if versioner:
+            versioner.update_bundle_version(self)
         self.generate_css(packing)
 
     def _optimize_output(self):
