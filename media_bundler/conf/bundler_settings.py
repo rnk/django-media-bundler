@@ -12,7 +12,7 @@ django.conf.settings module.
 
 from django.conf import settings
 
-from media_bundler import default_settings
+from media_bundler.conf import default_settings
 
 
 USE_BUNDLES = getattr(settings, "USE_BUNDLES",
@@ -21,3 +21,7 @@ DEFER_JAVASCRIPT = getattr(settings, "DEFER_JAVASCRIPT",
                            default_settings.DEFER_JAVASCRIPT)
 MEDIA_BUNDLES = getattr(settings, "MEDIA_BUNDLES",
                         default_settings.MEDIA_BUNDLES)
+BUNDLE_VERSION_FILE = getattr(settings, "BUNDLE_VERSION_FILE",
+                              default_settings.BUNDLE_VERSION_FILE)
+BUNDLE_VERSIONER = getattr(settings, "BUNDLE_VERSIONER",
+                           default_settings.BUNDLE_VERSIONER)

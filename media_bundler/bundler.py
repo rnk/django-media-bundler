@@ -13,6 +13,7 @@ from media_bundler.conf import bundler_settings
 from media_bundler.bin_packing import Box, pack_boxes
 from media_bundler.jsmin import jsmin
 from media_bundler.cssmin import minify_css
+from media_bundler import versioning
 
 
 class InvalidBundleType(Exception):
@@ -80,16 +81,21 @@ class Bundle(object):
     def get_extension(self):
         raise NotImplementedError
 
+    def get_bundle_filename(self):
+        return self.name + self.get_extension()
+
     def get_bundle_path(self):
-        path = self.name + self.get_extension()
-        return os.path.join(self.path, path)
+        filename = self.get_bundle_filename()
+        return os.path.join(self.path, filename)
 
     def get_bundle_url(self):
-        url = self.name + self.get_extension()
-        return self.url + url
+        unversioned = self.get_bundle_filename()
+        filename = versioning.get_bundle_versions().get(self.name, unversioned)
+        return self.url + filename
 
-    def make_bundle(self):
-        raise NotImplementedError
+    def make_bundle(self, versioner):
+        self._make_bundle()
+        versioner.update_bundle_version(self)
 
     def do_text_bundle(self, minifier=None):
         with open(self.get_bundle_path(), "w") as output:
@@ -113,7 +119,7 @@ class JavascriptBundle(Bundle):
     def get_extension(self):
         return ".js"
 
-    def make_bundle(self):
+    def _make_bundle(self):
         minifier = jsmin if self.minify else None
         self.do_text_bundle(minifier)
 
@@ -129,7 +135,7 @@ class CssBundle(Bundle):
     def get_extension(self):
         return ".css"
 
-    def make_bundle(self):
+    def _make_bundle(self):
         minifier = minify_css if self.minify else None
         self.do_text_bundle(minifier)
 
@@ -151,7 +157,7 @@ class PngSpriteBundle(Bundle):
     def get_extension(self):
         return ".png"
 
-    def make_bundle(self):
+    def make_bundle(self, versioner):
         import Image  # If this fails, you need the Python Imaging Library.
         boxes = [ImageBox(Image.open(path), path) for path in self.get_paths()]
         # Pick a max_width so that the sprite is squarish and a multiple of 16,
@@ -161,30 +167,22 @@ class PngSpriteBundle(Bundle):
                     (int(math.sqrt(total_area)) // 16 + 1) * 16)
         (_, height, packing) = pack_boxes(boxes, width)
         sprite = Image.new("RGBA", (width, height))
-        with open(self.css_file, "w") as css:
-            css.write("/* Generated classes for django-media-bundler sprites.  "
-                      "Don't edit! */\n")
-            props = {
-                "background-image": "url('%s')" % self.get_bundle_url(),
-            }
-            css.write(self.make_css(None, props))
-            for (left, top, box) in packing:
-                # This is a bit of magic to make the transparencies work.  To
-                # preserve transparency, we pass the image so it can take its
-                # alpha channel mask or something.  However, if the image has no
-                # alpha channels, then it fails, we we have to check if the
-                # image is RGBA here.
-                img = box.image
-                mask = img if img.mode == "RGBA" else None
-                sprite.paste(img, (left, top), mask)
-                props = {
-                    "background-position": "%dpx %dpx" % (-left, -top),
-                    "width": "%dpx" % box.width,
-                    "height": "%dpx" % box.height,
-                }
-                css.write(self.make_css(os.path.basename(box.filename), props))
+        for (left, top, box) in packing:
+            # This is a bit of magic to make the transparencies work.  To
+            # preserve transparency, we pass the image so it can take its
+            # alpha channel mask or something.  However, if the image has no
+            # alpha channels, then it fails, we we have to check if the
+            # image is RGBA here.
+            img = box.image
+            mask = img if img.mode == "RGBA" else None
+            sprite.paste(img, (left, top), mask)
         sprite.save(self.get_bundle_path(), "PNG")
         self._optimize_output()
+        # It's *REALLY* important that this happen here instead of after the
+        # generate_css() call, because if we waited, the CSS woudl have the URL
+        # of the last version of this bundle.
+        versioner.update_bundle_version(self)
+        self.generate_css(packing)
 
     def _optimize_output(self):
         """Optimize the PNG with pngcrush."""
@@ -198,6 +196,23 @@ class PngSpriteBundle(Bundle):
             raise Exception('pngcrush returned error code: %r\nOutput was:\n\n'
                             '%s' % (proc.returncode, proc.stdout.read()))
         shutil.move(tmp_path, sprite_path)
+
+    def generate_css(self, packing):
+        """Generate the background offset CSS rules."""
+        with open(self.css_file, "w") as css:
+            css.write("/* Generated classes for django-media-bundler sprites.  "
+                      "Don't edit! */\n")
+            props = {
+                "background-image": "url('%s')" % self.get_bundle_url(),
+            }
+            css.write(self.make_css(None, props))
+            for (left, top, box) in packing:
+                props = {
+                    "background-position": "%dpx %dpx" % (-left, -top),
+                    "width": "%dpx" % box.width,
+                    "height": "%dpx" % box.height,
+                }
+                css.write(self.make_css(os.path.basename(box.filename), props))
 
     CSS_REGEXP = re.compile(r"[^a-zA-Z\-_]")
 

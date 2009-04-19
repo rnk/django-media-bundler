@@ -48,8 +48,7 @@ def resolve_variable(var, context):
 
 class BundleNode(template.Node):
 
-    """
-    Base class for any nodes that are linking bundles.
+    """Base class for any nodes that are linking bundles.
 
     Subclasses must define class variables TAG and CONTEXT_VAR.  They can
     optionally override the method 'really_render(url)' to control tag-specific

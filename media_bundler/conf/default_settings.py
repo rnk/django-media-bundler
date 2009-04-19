@@ -20,6 +20,18 @@ USE_BUNDLES = not settings.DEBUG
 # http://developer.yahoo.net/blog/archives/2007/07/high_performanc_5.html
 DEFER_JAVASCRIPT = True
 
+# This setting enables bundle versioning and cache busting.  This should be a
+# file path to a Python module that will be live when the site is deployed.  The
+# bundler will write out Python code defining a dictionary mapping bundle names
+# to versions.
+BUNDLE_VERSION_FILE = None  # Ex: PROJECT_ROOT + "/bundle_versions.py"
+
+# If bundle versioning is enabled, this setting controls how the bundler
+# computes the current version.  Possible values are 'sha1', 'md5', and 'mtime'.
+# The md5 and sha1 versioners are preferred because they create less false
+# versions.
+BUNDLE_VERSIONER = 'sha1'
+
 MEDIA_BUNDLES = (
     # This should contain something like:
 
