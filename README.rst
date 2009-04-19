@@ -8,17 +8,17 @@ bundled together in your ``settings.py`` file, and run ``python manage.py
 bundle_media``.  The Media Bundler is inspired by the Rails' `Asset Packager`_
 plugin, which helps do roughly the same things for Rails.  This is not the first
 Django application for this task, and it is probably not the last.  You can find
-a good comparison of other media bundling tools here_.
+a good comparison of other media bundling tools here__.
 
 .. _Asset Packager: http://synthesis.sbecker.net/pages/asset_packager
-.. _here: http://qinsb.blogspot.com/2009/02/alternatives-to-django-media-bundler.html
+__ http://qinsb.blogspot.com/2009/02/alternatives-to-django-media-bundler.html
 
 Supported Bundle Types
 ----------------------
 
 - **Javascript**: The media bundler will concatenate and optionally minify your
   Javascript.  It also lets you to defer loading Javascript until the end of the
-  document, as described in here_.  We do not support packing, because that has
+  document, as described in here__.  We do not support packing, because that has
   been shown to slow down Javascript execution.
 
 - **CSS**: The media bundler will concatenate and optionally minify CSS.  It
@@ -29,7 +29,7 @@ Supported Bundle Types
   pngcrush_ on the resulting image, and generate CSS class names and rules to
   display your icons.
 
-.. _here: http://developer.yahoo.net/blog/archives/2007/07/high_performanc_5.html
+__ http://developer.yahoo.net/blog/archives/2007/07/high_performanc_5.html
 .. _pngcrush: http://pmt.sourceforge.net/pngcrush/
 
 Dependencies
