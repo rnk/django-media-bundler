@@ -11,8 +11,9 @@ from django.conf import settings
 # This flag determines whether to enable bundling or not.  To assist in
 # debugging, we recommend keeping files separate during development and bundle
 # them during production, so by default we just use settings.DEBUG, but you can
-# override that value if you wish.
-USE_BUNDLES = not settings.DEBUG
+# override that value if you wish by setting FORCE_BUNDLES to True in your
+# settings file.
+USE_BUNDLES = getattr(settings, 'FORCE_BUNDLES', False) or not settings.DEBUG
 
 # This puts your JavaScript at the bottom of your templates instead of the top
 # in order to allow the page to load before script execution, as described in
